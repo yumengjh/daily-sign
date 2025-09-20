@@ -41,5 +41,5 @@ jobs:
         env:
           GITHUB_PAT: ${{ secrets.PAT_TOKEN }}
         run: |
-          git remote set-url origin https://x-access-token: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@github.com/yumengjh/daily-sign.git
+          git remote set-url origin https://x-access-token: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@github.com/yumengjh/daily-sign.git
           git push origin main
