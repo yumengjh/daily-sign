@@ -1,0 +1,31 @@
+name: Daily Commit
+
+on:
+  schedule:
+    # 每天 UTC 12:00 执行（可改成你本地时间）
+    - cron: '0 12 * * *'
+  workflow_dispatch: # 可以手动触发
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add daily update
+        run: |
+          echo "$(date)" >> README.md
+          git add README.md
+          git commit -m "Daily check-in $(date +'%Y-%m-%d')" || echo "No changes to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
