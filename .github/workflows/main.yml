@@ -4,7 +4,7 @@ on:
   schedule:
     # 每天 UTC 12:00 执行（可改成你本地时间）
     - cron: '0 12 * * *'
-  workflow_dispatch: # 可以手动触发
+  workflow_dispatch: # 支持手动触发
 
 jobs:
   daily:
@@ -16,16 +16,17 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
 
       - name: Add daily update
         run: |
           echo "$(date)" >> README.md
           git add README.md
-          git commit -m "Daily check-in $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git commit -m "每日签到 $(date +'%Y-%m-%d')" || echo "No changes to commit"
 
       - name: Push changes
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_PAT: ${{ secrets.PAT_TOKEN }}
+        run: |
+          git push https://x-access-token:$GITHUB_PAT@github.com/<YOUR_USERNAME>/github-daily-sign.git main
