@@ -27,7 +27,16 @@ jobs:
           echo "$(date)" >> README.md
           git add README.md
           git commit -m "每日签到 $(date +'%Y-%m-%d')" || echo "No changes to commit"
-
+      - name: Debug PAT
+        run: |
+          if [ -z "$GITHUB_PAT" ]; then
+            echo "PAT 没有读取到！"
+            exit 1
+          else
+            echo "PAT 已读取"
+          fi
+        env:
+          GITHUB_PAT: ${{ secrets.PAT_TOKEN }}  
       - name: Push changes using PAT
         env:
           GITHUB_PAT: ${{ secrets.PAT_TOKEN }}
