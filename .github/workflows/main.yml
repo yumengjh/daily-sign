@@ -2,7 +2,7 @@ name: Daily README Check-in
 
 on:
   schedule:
-    - cron: "0 16 * * *"  # 每天 UTC 16 点 = 北京时间 0 点
+    - cron: "0 16 * * *"  # 每天 UTC 16点 = 北京时间 0点
   workflow_dispatch:
 
 jobs:
@@ -17,20 +17,21 @@ jobs:
 
       - name: Append Beijing time to README
         run: |
-          TZ="Asia/Shanghai"
-          current_time=$(date +"%Y年%m月%d日%H:%M:%S")
+          # 获取北京时间
+          current_time=$(TZ="Asia/Shanghai" date +"%Y年%m月%d日%H:%M:%S")
+          echo "🕒 北京时间: $current_time"
 
-          # 检查 README 中是否已有目标标题
-          if grep -q "^## Automatic check-in every day" README.md; then
-            # 在该标题下插入一行 "- 时间"
-            awk -v time="- ${current_time}" '
-              /^## Automatic check-in every day/ { print; print time; next }1
-            ' README.md > README.tmp && mv README.tmp README.md
-          else
-            # 如果没有该标题，则追加整个结构
+          # 如果 README 中没有标题，则新增
+          if ! grep -q "^## Automatic check-in every day" README.md; then
             echo "## Automatic check-in every day" >> README.md
-            echo "- ${current_time}" >> README.md
           fi
+
+          # 在标题下追加一行
+          awk -v time="- $current_time" '
+            BEGIN{added=0}
+            /^## Automatic check-in every day/ && added==0 { print; print time; added=1; next }
+            { print }
+          ' README.md > README.tmp && mv README.tmp README.md
 
       - name: Check for changes
         id: git_status
@@ -49,5 +50,5 @@ jobs:
         run: |
           git config user.name "auto-commit-bot"
           git config user.email "auto-commit-bot@users.noreply.github.com"
-          git commit -m "chore: daily check-in $(date +'%Y-%m-%d %H:%M:%S %Z')"
+          git commit -m "chore: daily check-in $(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')"
           git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main
