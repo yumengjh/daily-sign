@@ -1,9 +1,9 @@
-name: Auto Append Date to README
+name: Daily README Update
 
 on:
   schedule:
-    - cron: "0 16 * * *"  # 每天UTC 16点 = 北京时间 0点
-  workflow_dispatch:        # 支持手动触发
+    - cron: "0 16 * * *"  # 每天 UTC 16 点（北京时间 0 点）
+  workflow_dispatch:       # 支持手动触发
 
 jobs:
   update-readme:
@@ -13,13 +13,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          persist-credentials: false   # 用自定义 token 推送
+          persist-credentials: false
 
-      - name: Append current date
+      - name: Append current Beijing time to README
         run: |
-          now=$(date '+%Y年%m月%d日%H:%M:%S')
-          echo "🕒 当前时间: $now"
-          echo "$now" >> README.md
+          TZ="Asia/Shanghai"
+          current_time=$(date +"%Y年%m月%d日%H:%M:%S")
+          echo "$current_time" >> README.md
 
       - name: Check for changes
         id: git_status
@@ -27,19 +27,16 @@ jobs:
           git add README.md
           if git diff --cached --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "🟢 No changes detected."
           else
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "🟡 README updated."
           fi
 
-      - name: Commit and push
+      - name: Commit and push changes
         if: steps.git_status.outputs.changed == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.PUSH_TOKEN }}   # 你自己的 PAT 或 bot token
+          GITHUB_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
           git config user.name "auto-commit-bot"
           git config user.email "auto-commit-bot@users.noreply.github.com"
-          git commit -m "chore: append date $(date '+%Y-%m-%d %H:%M:%S')"
+          git commit -m "chore: update README with date $(date +'%Y-%m-%d %H:%M:%S %Z')"
           git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main
-          echo "✅ README updated and pushed."
