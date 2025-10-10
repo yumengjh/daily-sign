@@ -5,6 +5,9 @@ on:
     - cron: "0 16 * * *"  # 每天 UTC 16点 = 北京时间 0点
   workflow_dispatch:
 
+env:
+  USERNAME: ${{ secrets.USERNAME }}  # 用户名变量
+
 jobs:
   daily-checkin:
     runs-on: ubuntu-latest
@@ -49,9 +52,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
-          # 用你的真实 GitHub 用户信息（确保邮箱已绑定）
-          git config user.name "yumengjh"
-          git config user.email "yumengjh@users.noreply.github.com"
-
+          git config user.name "${{ env.USERNAME }}"
+          git config user.email "${{ env.USERNAME }}@users.noreply.github.com"
           git commit -m "chore: daily check-in $(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')"
-          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ env.USERNAME }}/${{ github.event.repository.name }}.git" HEAD:main
