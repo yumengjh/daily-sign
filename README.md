@@ -2,4 +2,4 @@
 Automatic check-in every day
 
 ## record
-- 
+
