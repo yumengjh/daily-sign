@@ -2,6 +2,8 @@
 
 每天自动提交代码
 
+[英文](https://github.com/yumengjh/daily-sign/blob/main/README-en.md)
+
 ## 步骤一：Fork 仓库
 
 点击右上角 “Fork” → 复制到你的 GitHub 账号。
