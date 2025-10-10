@@ -18,20 +18,21 @@ jobs:
       - name: Append Beijing time to README
         run: |
           # 获取北京时间
-          current_time=$(TZ="Asia/Shanghai" date +"%Y年%m月%d日%H:%M:%S")
+          current_time=$(TZ="Asia/Shanghai" date +"%Y-%m-%d %H:%M:%S")
           echo "🕒 北京时间: $current_time"
 
-          # 如果 README 中没有标题，则新增
-          if ! grep -q "^## Automatic check-in every day" README.md; then
-            echo "## Automatic check-in every day" >> README.md
+          # 检查是否存在 ## record
+          if grep -q "^## record" README.md; then
+            echo "✅ Found '## record', appending below..."
+            awk -v time="- $current_time" '
+              BEGIN{added=0}
+              /^## record/ && added==0 { print; print time; added=1; next }
+              { print }
+            ' README.md > README.tmp && mv README.tmp README.md
+          else
+            echo "⚠️ No '## record' found, appending to the end..."
+            echo -e "\n## record\n- $current_time" >> README.md
           fi
-
-          # 在标题下追加一行
-          awk -v time="- $current_time" '
-            BEGIN{added=0}
-            /^## Automatic check-in every day/ && added==0 { print; print time; added=1; next }
-            { print }
-          ' README.md > README.tmp && mv README.tmp README.md
 
       - name: Check for changes
         id: git_status
